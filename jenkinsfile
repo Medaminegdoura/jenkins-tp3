@@ -1,39 +1,44 @@
 pipeline {
-       agent any
-       environment {
-           DOCKER_IMAGE = 'votre-dockerhub/mon-app'
-       }
-       stages {
-           stage('Cloner le dépôt') {
-               steps {
-git 'https://github.com/mon-depot/mon-app.git&#39;
-               }
-           }
-           stage('Construire l\'image Docker') {
-               steps {
-                   script {
-                       sh 'docker build -t DOCKER_IMAGE .'
-                   
-           stage('Pousser límage Docker')
-               steps
-                   script
-                       withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')])
-                           sh 'docker login -uDOCKER_USERNAME -p DOCKER_PASSWORD'
-                           sh 'docker pushDOCKER_IMAGE'
-                       }
-                   }
-               }
-           }
-           stage('Déployer sur Kubernetes') {
-               steps {
-                   script {
-                       sh 'kubectl apply -f deployment.yaml'
-                       sh 'kubectl apply -f service.yaml'
-                   }
-               }
-           }
-       }
+    agent any
 
-   }
+    environment {
+        DOCKER_USERNAME = 'medaminegdouraucar'
+        IMAGE_NAME = 'tp3-jenkins'
+        TIME_TAG = "${new Date().format('yyyyMMdd-HHmmss')}"
+        DOCKER_IMAGE = "${DOCKER_USERNAME}/${IMAGE_NAME}:${TIME_TAG}"
+    }
 
+    stages {
+        stage('Cloner le dépôt') {
+            steps {
+                git 'https://github.com/Medaminegdoura/jenkins-tp3'
+            }
+        }
+
+        stage('Construire l\'image Docker') {
+            steps {
+                script {
+                    sh "docker build -t $DOCKER_IMAGE ."
+                }
+            }
+        }
+
+        stage('Pousser l\'image Docker') {
+            steps {
+                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_TOKEN')]) {
+                    sh "echo \$DOCKER_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin"
+                    sh "docker push $DOCKER_IMAGE"
+                }
+            }
+        }
+
+        stage('Déployer sur Kubernetes') {
+            steps {
+                script {
+                    sh 'kubectl apply -f deployment.yaml'
+                    sh 'kubectl apply -f service.yaml'
+                }
+            }
+        }
+    }
 }
