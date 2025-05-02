@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Cloner le dépôt') {
             steps {
-                git 'https://github.com/Medaminegdoura/jenkins-tp3'
+                git branch: 'main',url :'https://github.com/Medaminegdoura/jenkins-tp3'
             }
         }
 
