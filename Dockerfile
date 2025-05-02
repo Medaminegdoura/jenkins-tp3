@@ -1,5 +1,5 @@
 # Étape 1 : Build
-FROM node:18-alpine as builder
+FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -12,4 +12,4 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY package*.json ./
 RUN npm install --only=production
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]
